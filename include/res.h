@@ -29,7 +29,7 @@ namespace emu
 		return (r.rc != Rc::OK);
 		}
 
-	inline void prompt_error_box(const char* iContext, const char* iErrorMsg=nullptr, Res* iErrc=nullptr)
+	inline void prompt_error_box(const char* iContext, const char* iErrorMsg = nullptr, Res* iErrc = nullptr)
 		{
 		std::string error = iContext;
 		error += "\nFull message is :";
@@ -39,8 +39,7 @@ namespace emu
 			error += "\nCode is " + std::to_string(static_cast<size_t>(iErrc->rc)) 
 				+ " / syserr " + std::to_string(iErrc->sys_code);
 			}
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Chip8Emu Error", 
-			error.c_str(), nullptr);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Chip8Emu Error", error.c_str(), nullptr);
 		}
 
 	static_assert(sizeof(Res) == 8, "Unexpected Res size!");
