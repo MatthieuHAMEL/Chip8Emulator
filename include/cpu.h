@@ -4,7 +4,7 @@
 #include <fstream>
 #include <filesystem>
 
-namespace Emu
+namespace emu
 	{
 	constexpr size_t MEM_SZ = 4096;
 	constexpr size_t START_ADDR = 512;
@@ -46,7 +46,7 @@ namespace Emu
 			cpu.sound_cnt--;
 		}
 
-	Res load_rom(const std::filesystem::path& iRomPath, CPU& ioCpu)
+	inline Res load_rom(const std::filesystem::path& iRomPath, CPU& ioCpu)
 		{
 		// Open ROM file in binary mode 
 		std::ifstream ifile(iRomPath, std::ios::binary);
