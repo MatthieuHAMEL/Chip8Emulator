@@ -22,9 +22,10 @@ int main(int argc, char** argv)
 	Res res = load_rom(rom_path, cpu);
 	if (FAILED(res))
 		{
-		fprintf(stderr, "couldn't load rom Error=<%u>\n", res.rc);
+		prompt_error_box("load_rom error", nullptr, &res);
 		return 1;
 		}
+
 
 	return 0;
 	}

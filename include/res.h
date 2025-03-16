@@ -29,11 +29,16 @@ namespace emu
 		return (r.rc != Rc::OK);
 		}
 
-	inline void prompt_error_box(const char* iContext, const char* iErrorMsg)
+	inline void prompt_error_box(const char* iContext, const char* iErrorMsg=nullptr, Res* iErrc=nullptr)
 		{
 		std::string error = iContext;
 		error += "\nFull message is :";
-		error += iErrorMsg;
+		error += iErrorMsg ? iErrorMsg : "[none]";
+		if (iErrc)
+			{
+			error += "\nCode is " + std::to_string(static_cast<size_t>(iErrc->rc)) 
+				+ " / syserr " + std::to_string(iErrc->sys_code);
+			}
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Chip8Emu Error", 
 			error.c_str(), nullptr);
 		}
