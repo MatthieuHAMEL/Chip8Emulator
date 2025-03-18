@@ -81,7 +81,7 @@ void emu_ADD(uint16_t iInstr, emu::Console* ioConsole)
 // (8XY0) - sets VX to VY
 void emu_MOV(uint16_t iInstr, emu::Console* ioConsole)
 	{
-	ioConsole->cpu.regs[iInstr & 0x0F00 >> 8] = ioConsole->cpu.regs[iInstr & 0x00F0 >> 4];
+	ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8] = ioConsole->cpu.regs[(iInstr & 0x00F0) >> 4];
 	}
 
 void emu_OR(uint16_t iInstr, emu::Console*)
@@ -93,7 +93,7 @@ void emu_OR(uint16_t iInstr, emu::Console*)
 void emu_AND(uint16_t iInstr, emu::Console* ioConsole)
 	{
 	auto& cpu = ioConsole->cpu;
-	cpu.regs[iInstr & 0x0F00 >> 8] = cpu.regs[iInstr & 0x0F00 >> 8] & cpu.regs[iInstr & 0x00F0 >> 4];
+	cpu.regs[iInstr & 0x0F00 >> 8] = cpu.regs[(iInstr & 0x0F00) >> 8] & cpu.regs[(iInstr & 0x00F0) >> 4];
 	}
 
 void emu_XOR(uint16_t iInstr, emu::Console*)
@@ -104,26 +104,37 @@ void emu_ADDR(uint16_t iInstr, emu::Console*)
 {
 	throw 1;
 }
-void emu_SUB(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
+
+// (8XY5) - substracts VY to VX. Sets VF to 1 if NOT borrow, else 0.
+void emu_SUB(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	auto& vx = ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8];
+	auto& vy = ioConsole->cpu.regs[(iInstr & 0x00F0) >> 4];
+	
+	ioConsole->cpu.regs[0xF] = (vx > vy) ? 1 : 0;
+	vx -= vy;
+	}
+
 void emu_SHR(uint16_t iInstr, emu::Console*)
-{
+	{
 	throw 1;
-}
+	}
+
 void emu_SKRNE(uint16_t iInstr, emu::Console*)
-{
+	{
 	throw 1;
-}
+	}
+
 void emu_LDI(uint16_t iInstr, emu::Console* iConsole)
 	{
 	iConsole->cpu.I = iInstr & 0x0FFF;
 	}
+
 void emu_JMPI(uint16_t iInstr, emu::Console*)
-{
+	{
 	throw 1;
-}
+	}
+
 void emu_RND(uint16_t iInstr, emu::Console* ioConsole)
 	{
 	// (CXNN)-Sets VX to(NN & R) where R is random in[| 0, 255 | ]
@@ -174,21 +185,21 @@ void emu_DRW(uint16_t iInstr, emu::Console* ioConsole)
 void emu_SKPR(uint16_t iInstr, emu::Console* ioConsole)
 	{
 	auto& cpu = ioConsole->cpu;
-	if (ioConsole->keyboard.console_keys[cpu.regs[iInstr & 0x0F00 >> 8]])
+	if (ioConsole->keyboard.console_keys[cpu.regs[(iInstr & 0x0F00) >> 8]])
 		{
 		cpu.pc += 2;
 		}
 	}
 
 void emu_SKUP(uint16_t iInstr, emu::Console*)
-{
+	{
 	throw 1;
-}
+	}
 
 // (FX07)-Sets VX to sys_cnt
 void emu_MOVDT(uint16_t iInstr, emu::Console* ioConsole)
 	{
-	ioConsole->cpu.regs[iInstr & 0x0F00 >> 8] = ioConsole->cpu.sys_cnt;
+	ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8] = ioConsole->cpu.sys_cnt;
 	}
 
 // (FX0A) - Waits for a key to be pressed, then store its value in VX
@@ -206,7 +217,7 @@ void emu_KWAIT(uint16_t iInstr, emu::Console* ioConsole)
 			if (ioConsole->keyboard.console_keys[i] && !old_key_state[i]) // A new key has been pressed
 				{
 				// "The value of that key is stored in VX"
-				ioConsole->cpu.regs[iInstr & 0x0F00 >> 8] = i;
+				ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8] = i;
 				return;
 				}
 			}
@@ -217,13 +228,13 @@ void emu_KWAIT(uint16_t iInstr, emu::Console* ioConsole)
 // (FX15)-Sets sys_cnt to VX
 void emu_LDDT(uint16_t iInstr, emu::Console* ioConsole)
 	{
-	ioConsole->cpu.sys_cnt = ioConsole->cpu.regs[iInstr & 0x0F00 >> 8];
+	ioConsole->cpu.sys_cnt = ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8];
 	}	
 
 // (FX18) - Sets sound_cnt to VX
 void emu_LDST(uint16_t iInstr, emu::Console* ioConsole)
 	{
-	ioConsole->cpu.sound_cnt = ioConsole->cpu.regs[iInstr & 0x0F00 >> 8];
+	ioConsole->cpu.sound_cnt = ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8];
 	}
 
 // (FX1E) - Adds VX to I. Sets VF to 1 if overflow, else 0.
@@ -241,21 +252,33 @@ void emu_ADDI(uint16_t iInstr, emu::Console* ioConsole)
 void emu_LDSPR(uint16_t iInstr, emu::Console* ioConsole)
 	{
 	// cf. initialize_memory_fonts
-	ioConsole->cpu.I = 5 * ioConsole->cpu.regs[iInstr & 0x0F00 >> 8];
+	ioConsole->cpu.I = 5 * ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8];
 	}
 
-void emu_BCD(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
-void emu_STOR(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
-void emu_READ(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
+// (FX33) - Store BCD (binary coded decimal) representation of Vx in I, I+1, I+2
+void emu_BCD(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	auto& cpu = ioConsole->cpu;
+	uint16_t nb = cpu.regs[(iInstr & 0x0F00) >> 8];
+	cpu.mem[cpu.I + 2] = nb % 10;
+	cpu.mem[cpu.I + 1] = (nb / 10) % 10;
+	cpu.mem[cpu.I] = nb / 100;
+	}
+
+// (FX55) - Store registers V0 to Vx in memory starting at address I.
+void emu_STOR(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	auto& cpu = ioConsole->cpu;
+	memcpy((void*) &cpu.mem[cpu.I], (void*) &cpu.regs[0], (1 + ((iInstr & 0x0F00) >> 8)) * sizeof(uint16_t));
+	}
+
+// (FX65) - Sets registers V0 to VX with memory value starting from address I.
+void emu_READ(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	auto& cpu = ioConsole->cpu;
+	memcpy((void*)&cpu.regs[0], (void*)&cpu.mem[cpu.I], (1 + ((iInstr & 0x0F00) >> 8)) * sizeof(uint16_t));
+	}
+
 void emu_SYS(uint16_t, emu::Console*)
 	{
 	fprintf(stderr, "emu_SYS (not implemented)\n");
