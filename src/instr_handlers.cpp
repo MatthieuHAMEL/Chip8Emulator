@@ -6,7 +6,8 @@ using namespace emu;
 // (1NNN) - jump to address NNN
 void emu_JMP(uint16_t iInstr, emu::Console* ioConsole)
 	{
-	ioConsole->cpu.pc = (iInstr & 0x0FFF);
+	// -2 because pc is incremented by 2 after every instruction
+	ioConsole->cpu.pc = (iInstr & 0x0FFF) - 2;
 	}
 
 void emu_CLS(uint16_t iInstr, emu::Console*)
