@@ -23,14 +23,16 @@ void emu_CALL(uint16_t iInstr, emu::Console* ioConsole)
 	{
 	auto& cpu = ioConsole->cpu; // for readability...
 	// Fill the stack with the current program counter
+	assert(cpu.stackpos < STACK_SZ);
 	cpu.stack[cpu.stackpos] = cpu.pc;
 	if (cpu.stackpos < STACK_SZ - 1)
 		cpu.stackpos++;
-	else
+	else {
 		fprintf(stderr, "stack overflow!");
-
+		assert(false);
+	}
 	// Now jump to the function
-	cpu.pc = iInstr & 0x0FFF - 2;
+	cpu.pc = iInstr & 0x0FFF - 2; // TODO 
 	}
 
 // (3XNN) - skip next instruction if VX == NN
@@ -112,23 +114,41 @@ void emu_RND(uint16_t iInstr, emu::Console* ioConsole)
 	}
 
 /*
-(DXYN)-Draws a sprite at VX, VY coordinates.Sprite is 8px large
-and Npx tall. Every 8px row is read in binary from address I. Doesn't change I.
+(DXYN)-
+Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
+The interpreter reads n bytes from memory, starting at the address stored in I. 
+These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). 
+Sprites are XORed onto the existing screen. 
+If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. 
+If the sprite is positioned so part of it is outside the coordinates of the display, 
+it wraps around to the opposite side of the screen. 
+See instruction 8xy3 for more information on XOR, and section 2.4, 
+Display, for more information on the Chip-8 screen and sprites.
+
 */
 void emu_DRW(uint16_t iInstr, emu::Console* ioConsole)
 	{
 	uint8_t const height_px = iInstr & 0x000F;
 	uint16_t const vx = ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8];
 	uint16_t const vy = ioConsole->cpu.regs[(iInstr & 0x00F0) >> 4];
-
+	uint16_t px_idx = ioConsole->cpu.I;
 	for (int i = 0; i < height_px; ++i)
 		{
 		for (int j = 0; j < 8; ++j)
 			{
-			ioConsole->screen.pix_grid[vx + j][vy + i] = !ioConsole->screen.pix_grid[vx + j][vy + i];
-			} // TODO VF.
+			// The XOR :
+			// If memory is 0, whether the pixel is 1 or 0, don't touch it
+			// If memory is 1, reverse it (if it is 1 it becomes 0, if it is 0 it becomes 1)
+			if ((ioConsole->cpu.mem[px_idx] << j) & 0b10000000)
+				{
+				auto& pixel = ioConsole->screen.pix_grid[(vx + j) % SCREEN_W][(vy + i) % SCREEN_H];
+				if (pixel)
+					ioConsole->cpu.regs[0xF] = 1;
+				pixel = !pixel;
+				}
+			}
+		++px_idx;
 		}
-
 	}
 void emu_SKPR(uint16_t iInstr, emu::Console*)
 {
