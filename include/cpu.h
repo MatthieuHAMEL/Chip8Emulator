@@ -133,4 +133,6 @@ namespace emu
 		}
 
 	void exec_instructions(size_t N, Console& ioConsole);
+
+	void initialize_memory_fonts(CPU& ioCpu);
 	}

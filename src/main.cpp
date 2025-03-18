@@ -1,4 +1,3 @@
-//#define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include "cpu.h"
 #include "res.h"
@@ -15,12 +14,9 @@ using namespace emu;
 
 int main(int argc, char** argv)
 	{
-	//SDL_SetMainReady();
 	printf("Matoutest\n");
 
-	std::filesystem::path const rom_path = "C:\\tmp\\logo.ch8";
-
-	
+	std::filesystem::path const rom_path = "C:\\tmp\\clock.ch8";
 
 	Console console;
 	init_console(console);
@@ -35,6 +31,5 @@ int main(int argc, char** argv)
 	run_console(console);
 
 	destroy_console(console);
-
 	return 0;
 	}

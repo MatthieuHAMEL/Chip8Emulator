@@ -176,10 +176,30 @@ void emu_MOVDT(uint16_t iInstr, emu::Console*)
 {
 	throw 1;
 }
-void emu_KWAIT(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
+
+// (FX0A) - Waits for a key to be pressed, then store its value in VX
+void emu_KWAIT(uint16_t iInstr, emu::Console* ioConsole)
+	{	
+	// Copy current console key state :
+	bool old_key_state[NB_KEYS];
+	memcpy(old_key_state, ioConsole->keyboard.console_keys, sizeof(old_key_state));
+
+	// Start event subloop 
+	while (!poll_events(*ioConsole))
+		{
+		for (size_t i = 0; i < NB_KEYS; ++i)
+			{
+			if (ioConsole->keyboard.console_keys[i] && !old_key_state[i]) // A new key has been pressed
+				{
+				// "The value of that key is stored in VX"
+				ioConsole->cpu.regs[iInstr & 0x0F00 >> 8] = i;
+				return;
+				}
+			}
+		}
+	fprintf(stderr, "Quit in subloop... (propagating...)");
+	}
+
 void emu_LDDT(uint16_t iInstr, emu::Console*)
 {
 	throw 1;
@@ -200,10 +220,14 @@ void emu_ADDI(uint16_t iInstr, emu::Console* ioConsole)
 	ioConsole->cpu.I += ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8];
 	}
 
-void emu_LDSPR(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
+//  (FX29) - Sets I to the location for the hexadecimal sprite corresponding VX value.
+// Characters 0-F (in hexadecimal) are represented by a 4x5 font
+void emu_LDSPR(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	// cf. initialize_memory_fonts
+	ioConsole->cpu.I = 5 * ioConsole->cpu.regs[iInstr & 0x0F00 >> 8];
+	}
+
 void emu_BCD(uint16_t iInstr, emu::Console*)
 {
 	throw 1;
