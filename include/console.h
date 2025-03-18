@@ -32,22 +32,11 @@ namespace emu
 		destroy_SDL();
 		}
 	
-	inline void run_console(Console& iConsole)
+	inline Res load_rom(const std::filesystem::path& iRomPath, Console& ioConsole)
 		{
-		SDL_Event evt = {};
-		bool done = false;
-		while (!done)
-			{
-			while (SDL_PollEvent(&evt) != 0)
-				{
-				if (evt.type == SDL_QUIT) // Only event for now.
-					done = true; 
-				}
-
-			/*Execute 4 instructions (250Hz freq choice)*/
-			render_screen(iConsole.screen);
-			SDL_Delay(16);
-			}
+		return load_rom(iRomPath, ioConsole.cpu);
 		}
+
+	void run_console(Console& ioConsole);
 
 	}
