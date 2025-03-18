@@ -10,14 +10,20 @@ void emu_JMP(uint16_t iInstr, emu::Console* ioConsole)
 	ioConsole->cpu.pc = (iInstr & 0x0FFF) - 2;
 	}
 
-void emu_CLS(uint16_t iInstr, emu::Console*)
+void emu_CLS(uint16_t iInstr, emu::Console* ioConsole)
 {
-	throw 1;
+	clear_screen(ioConsole->screen);
 }
-void emu_RET(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
+
+// (00EE) - return from function
+void emu_RET(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	auto& cpu = ioConsole->cpu; // for readability
+	assert(cpu.stackpos >= 1);
+	cpu.stackpos--;
+	// Jump back to previous instruction in the stack 
+	cpu.pc = cpu.stack[cpu.stackpos];
+	}
 
 // (2NNN) - call function at address NNN
 void emu_CALL(uint16_t iInstr, emu::Console* ioConsole)
@@ -28,10 +34,11 @@ void emu_CALL(uint16_t iInstr, emu::Console* ioConsole)
 	cpu.stack[cpu.stackpos] = cpu.pc;
 	if (cpu.stackpos < STACK_SZ - 1)
 		cpu.stackpos++;
-	else {
+	else 
+		{
 		fprintf(stderr, "stack overflow!");
 		assert(false);
-	}
+		}
 	// Now jump to the function
 	cpu.pc = iInstr & 0x0FFF - 2; // TODO 
 	}
@@ -44,10 +51,16 @@ void emu_SKEQ(uint16_t iInstr, emu::Console* ioConsole)
 		ioConsole->cpu.pc += 2;
 		}
 	}
-void emu_SKNE(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
+
+// (4XNN) - skip next instruction if VX != NN
+void emu_SKNE(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	if (ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8] != (iInstr & 0x00FF))
+		{
+		ioConsole->cpu.pc += 2;
+		}
+	}
+
 void emu_SKREQ(uint16_t iInstr, emu::Console*)
 {
 	throw 1;
@@ -176,10 +189,17 @@ void emu_LDST(uint16_t iInstr, emu::Console*)
 {
 	throw 1;
 }
-void emu_ADDI(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
+
+// (FX1E) - Adds VX to I. Sets VF to 1 if overflow, else 0.
+void emu_ADDI(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	if (ioConsole->cpu.I + ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8] > 0xFFF)
+		ioConsole->cpu.regs[0xF] = 1;
+	else
+		ioConsole->cpu.regs[0xF] = 0;
+	ioConsole->cpu.I += ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8];
+	}
+
 void emu_LDSPR(uint16_t iInstr, emu::Console*)
 {
 	throw 1;

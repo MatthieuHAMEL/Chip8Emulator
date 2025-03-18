@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 	//SDL_SetMainReady();
 	printf("Matoutest\n");
 
-	std::filesystem::path const rom_path = "C:\\tmp\\maze.ch8";
+	std::filesystem::path const rom_path = "C:\\tmp\\logo.ch8";
 
 	
 
