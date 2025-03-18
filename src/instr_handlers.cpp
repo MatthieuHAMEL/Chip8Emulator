@@ -11,9 +11,9 @@ void emu_JMP(uint16_t iInstr, emu::Console* ioConsole)
 	}
 
 void emu_CLS(uint16_t iInstr, emu::Console* ioConsole)
-{
+	{
 	clear_screen(ioConsole->screen);
-}
+	}
 
 // (00EE) - return from function
 void emu_RET(uint16_t iInstr, emu::Console* ioConsole)
@@ -83,14 +83,19 @@ void emu_MOV(uint16_t iInstr, emu::Console* ioConsole)
 	{
 	ioConsole->cpu.regs[iInstr & 0x0F00 >> 8] = ioConsole->cpu.regs[iInstr & 0x00F0 >> 4];
 	}
+
 void emu_OR(uint16_t iInstr, emu::Console*)
 {
 	throw 1;
 }
-void emu_AND(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
+
+// (8XY2) - sets VX to (VX & VY)
+void emu_AND(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	auto& cpu = ioConsole->cpu;
+	cpu.regs[iInstr & 0x0F00 >> 8] = cpu.regs[iInstr & 0x0F00 >> 8] & cpu.regs[iInstr & 0x00F0 >> 4];
+	}
+
 void emu_XOR(uint16_t iInstr, emu::Console*)
 {
 	throw 1;
@@ -137,9 +142,7 @@ If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0
 If the sprite is positioned so part of it is outside the coordinates of the display, 
 it wraps around to the opposite side of the screen. 
 See instruction 8xy3 for more information on XOR, and section 2.4, 
-Display, for more information on the Chip-8 screen and sprites.
-
-*/
+Display, for more information on the Chip-8 screen and sprites. */
 void emu_DRW(uint16_t iInstr, emu::Console* ioConsole)
 	{
 	uint8_t const height_px = iInstr & 0x000F;
@@ -157,25 +160,36 @@ void emu_DRW(uint16_t iInstr, emu::Console* ioConsole)
 				{
 				auto& pixel = ioConsole->screen.pix_grid[(vx + j) % SCREEN_W][(vy + i) % SCREEN_H];
 				if (pixel)
+					{
 					ioConsole->cpu.regs[0xF] = 1;
+					}
 				pixel = !pixel;
 				}
 			}
 		++px_idx;
 		}
 	}
-void emu_SKPR(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
+
+// (EX9E)-Skips next instruction if key whose value is in VX is pressed.
+void emu_SKPR(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	auto& cpu = ioConsole->cpu;
+	if (ioConsole->keyboard.console_keys[cpu.regs[iInstr & 0x0F00 >> 8]])
+		{
+		cpu.pc += 2;
+		}
+	}
+
 void emu_SKUP(uint16_t iInstr, emu::Console*)
 {
 	throw 1;
 }
-void emu_MOVDT(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
+
+// (FX07)-Sets VX to sys_cnt
+void emu_MOVDT(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	ioConsole->cpu.regs[iInstr & 0x0F00 >> 8] = ioConsole->cpu.sys_cnt;
+	}
 
 // (FX0A) - Waits for a key to be pressed, then store its value in VX
 void emu_KWAIT(uint16_t iInstr, emu::Console* ioConsole)
@@ -200,15 +214,17 @@ void emu_KWAIT(uint16_t iInstr, emu::Console* ioConsole)
 	fprintf(stderr, "Quit in subloop... (propagating...)");
 	}
 
-void emu_LDDT(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
+// (FX15)-Sets sys_cnt to VX
+void emu_LDDT(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	ioConsole->cpu.sys_cnt = ioConsole->cpu.regs[iInstr & 0x0F00 >> 8];
+	}	
 
-}
-void emu_LDST(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
+// (FX18) - Sets sound_cnt to VX
+void emu_LDST(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	ioConsole->cpu.sound_cnt = ioConsole->cpu.regs[iInstr & 0x0F00 >> 8];
+	}
 
 // (FX1E) - Adds VX to I. Sets VF to 1 if overflow, else 0.
 void emu_ADDI(uint16_t iInstr, emu::Console* ioConsole)
@@ -242,5 +258,5 @@ void emu_READ(uint16_t iInstr, emu::Console*)
 }
 void emu_SYS(uint16_t, emu::Console*)
 	{
-	fprintf(stderr, "emu_SYS\n");
+	fprintf(stderr, "emu_SYS (not implemented)\n");
 	}

@@ -24,7 +24,7 @@ namespace emu
     inline Res init_screen(Screen& iScreen)
         {
         iScreen.window = SDL_CreateWindow(
-            "Chip8 Emulator", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+            "Matthieu's Chip8 Emulator", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN);
 
         if (!iScreen.window)

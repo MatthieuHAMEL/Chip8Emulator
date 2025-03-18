@@ -40,9 +40,11 @@ void emu::exec_instructions(size_t N, Console& ioConsole)
 				{
 				found = true;
 
+				count(ioConsole.cpu);
+				
 				// Execute the instruction
 				OPCODE_MASKS[i].handler(opcode, &ioConsole);
-
+				
 				// Increment pc for next instruction
 				ioConsole.cpu.pc += 2;
 				break;
