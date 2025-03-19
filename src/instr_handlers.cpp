@@ -61,10 +61,14 @@ void emu_SKNE(uint16_t iInstr, emu::Console* ioConsole)
 		}
 	}
 
-void emu_SKREQ(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
+// (5XY0) - skip next instruction if VX == VY
+void emu_SKREQ(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	if (ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8] == (iInstr & 0x00FF))
+		{
+		ioConsole->cpu.pc += 2;
+		}
+	}
 
 // (6XNN) - sets VX to NN
 void emu_LD(uint16_t iInstr, emu::Console* ioConsole)
@@ -100,10 +104,16 @@ void emu_XOR(uint16_t iInstr, emu::Console*)
 {
 	throw 1;
 }
-void emu_ADDR(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
+
+// (8XY4) - adds VY to VX. Sets VF to 1 if carry, else 0.
+void emu_ADDR(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	uint8_t& vx = ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8];   // (chip8->current_op & 0x0F00) >> 8;
+	uint8_t& vy = ioConsole->cpu.regs[(iInstr & 0x00F0) >> 4];
+	uint16_t sum = vx + vy;
+	ioConsole->cpu.regs[0xF] = (sum > 255) ? 1 : 0; // Carry ?
+	vx = (sum & 0xFF);
+	}
 
 // (8XY5) - substracts VY to VX. Sets VF to 1 if NOT borrow, else 0.
 void emu_SUB(uint16_t iInstr, emu::Console* ioConsole)
@@ -120,9 +130,13 @@ void emu_SHR(uint16_t iInstr, emu::Console*)
 	throw 1;
 	}
 
-void emu_SKRNE(uint16_t iInstr, emu::Console*)
+// (9XY0) - skips next instruction if VX != VY
+void emu_SKRNE(uint16_t iInstr, emu::Console* ioConsole)
 	{
-	throw 1;
+	if (ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8] != ioConsole->cpu.regs[(iInstr & 0x00F0) >> 4])
+		{
+		ioConsole->cpu.pc += 2;
+		}
 	}
 
 void emu_LDI(uint16_t iInstr, emu::Console* iConsole)
