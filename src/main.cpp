@@ -16,7 +16,7 @@ int main(int argc, char** argv)
 	{
 	printf("Matoutest\n");
 
-	std::filesystem::path const rom_path = "C:\\tmp\\rndtest.ch8";
+	std::filesystem::path const rom_path = "C:\\tmp\\maze.ch8";
 
 	Console console;
 	init_console(console);
