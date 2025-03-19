@@ -150,14 +150,17 @@ void emu_SKRNE(uint16_t iInstr, emu::Console* ioConsole)
 		}
 	}
 
+// (ANNN) - Sets I to NNN
 void emu_LDI(uint16_t iInstr, emu::Console* iConsole)
 	{
 	iConsole->cpu.I = iInstr & 0x0FFF;
 	}
 
-void emu_JMPI(uint16_t iInstr, emu::Console*)
+// (BNNN)-Jumps to NNN + V0
+void emu_JMPI(uint16_t iInstr, emu::Console* ioConsole)
 	{
-	throw 1;
+	auto& cpu = ioConsole->cpu;
+	cpu.pc = (iInstr & 0x0FFF) + cpu.regs[0] - 2;
 	}
 
 void emu_RND(uint16_t iInstr, emu::Console* ioConsole)
@@ -206,7 +209,7 @@ void emu_DRW(uint16_t iInstr, emu::Console* ioConsole)
 		}
 	}
 
-// (EX9E)-Skips next instruction if key whose value is in VX is pressed.
+// (EX9E) - Skips next instruction if key whose value is in VX is pressed.
 void emu_SKPR(uint16_t iInstr, emu::Console* ioConsole)
 	{
 	auto& cpu = ioConsole->cpu;
@@ -216,9 +219,14 @@ void emu_SKPR(uint16_t iInstr, emu::Console* ioConsole)
 		}
 	}
 
-void emu_SKUP(uint16_t iInstr, emu::Console*)
+// (EXA1) - Skips next instruction if key whose value is in VX is not pressed.
+void emu_SKUP(uint16_t iInstr, emu::Console* ioConsole)
 	{
-	throw 1;
+	auto& cpu = ioConsole->cpu;
+	if (!(ioConsole->keyboard.console_keys[cpu.regs[(iInstr & 0x0F00) >> 8]]))
+		{
+		cpu.pc += 2;
+		}
 	}
 
 // (FX07)-Sets VX to sys_cnt
