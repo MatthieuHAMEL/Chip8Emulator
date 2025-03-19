@@ -37,7 +37,7 @@ namespace emu
 		{0xF00F, 0x8003, emu_XOR}, // xor   (8XY3) - sets VX to (VX ^ VY)
 		{0xF00F, 0x8004, emu_ADDR}, // addr  (8XY4) - adds VY to VX. Sets VF to 1 if carry, else 0.
 		{0xF00F, 0x8005, emu_SUB}, // sub   (8XY5) - substracts VY to VX. Sets VF to 1 if NOT borrow, else 0.
-		{0xF00F, 0x8006, emu_SHR}, // shr   (8XY6) - 1 bit left shift of VX. VF is set to VX's former MSB.
+		{0xF00F, 0x8006, emu_SHR}, // shr   (8XY6) - 1 bit right shift of VX. VF is set to VX's former LSB.
 		{0xF00F, 0x9000, emu_SKRNE}, // skrne (9XY0) - skips next instruction if VX != VY
 		{0xF000, 0xA000, emu_LDI}, // ldi   (ANNN) - Sets I to NNN
 		{0xF000, 0xB000, emu_JMPI}, // jmpi  (BNNN) - Jumps to NNN+V0

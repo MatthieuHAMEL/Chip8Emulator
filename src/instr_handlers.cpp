@@ -88,10 +88,12 @@ void emu_MOV(uint16_t iInstr, emu::Console* ioConsole)
 	ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8] = ioConsole->cpu.regs[(iInstr & 0x00F0) >> 4];
 	}
 
-void emu_OR(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
+// (8XY1) - sets VX to (VX | VY)
+void emu_OR(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	auto& cpu = ioConsole->cpu;
+	cpu.regs[iInstr & 0x0F00 >> 8] = cpu.regs[(iInstr & 0x0F00) >> 8] | cpu.regs[(iInstr & 0x00F0) >> 4];
+	}
 
 // (8XY2) - sets VX to (VX & VY)
 void emu_AND(uint16_t iInstr, emu::Console* ioConsole)
@@ -100,10 +102,12 @@ void emu_AND(uint16_t iInstr, emu::Console* ioConsole)
 	cpu.regs[iInstr & 0x0F00 >> 8] = cpu.regs[(iInstr & 0x0F00) >> 8] & cpu.regs[(iInstr & 0x00F0) >> 4];
 	}
 
-void emu_XOR(uint16_t iInstr, emu::Console*)
-{
-	throw 1;
-}
+// (8XY3) sets VX to (VX ^ VY)
+void emu_XOR(uint16_t iInstr, emu::Console* ioConsole)
+	{
+	auto& cpu = ioConsole->cpu;
+	cpu.regs[iInstr & 0x0F00 >> 8] = cpu.regs[(iInstr & 0x0F00) >> 8] ^ cpu.regs[(iInstr & 0x00F0) >> 4];
+	}
 
 // (8XY4) - adds VY to VX. Sets VF to 1 if carry, else 0.
 void emu_ADDR(uint16_t iInstr, emu::Console* ioConsole)
@@ -125,9 +129,16 @@ void emu_SUB(uint16_t iInstr, emu::Console* ioConsole)
 	vx -= vy;
 	}
 
-void emu_SHR(uint16_t iInstr, emu::Console*)
+// (8XY6) - 1 bit right shift of VX. VF is set to VX's former LSB.
+void emu_SHR(uint16_t iInstr, emu::Console* ioConsole)
 	{
-	throw 1;
+	auto& vx = ioConsole->cpu.regs[(iInstr & 0x0F00) >> 8];
+
+	// Set carry to LSB of vx
+	ioConsole->cpu.regs[0xF] = (vx % 2);
+
+	// Right shift vx
+	vx = vx >> 1;
 	}
 
 // (9XY0) - skips next instruction if VX != VY
