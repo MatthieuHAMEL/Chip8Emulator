@@ -4,6 +4,7 @@ This is a classic C project of Chip8 assembly interpreter I've done on my free t
 ## Usage
 
 .\Chip8Emulator.exe A:\path\to\some\rom.ch8
+
 ./Chip8Emulator /path/to/some/rom.ch8
 
 ## Some screenshots 
