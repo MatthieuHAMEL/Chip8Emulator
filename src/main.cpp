@@ -14,9 +14,13 @@ using namespace emu;
 
 int main(int argc, char** argv)
 	{
-	printf("Matoutest\n");
+	if (argc != 2)
+		{
+		prompt_error_box("Usage: ./Chip8Emulator path_to_a_rom.ch8");
+		return 1;
+		}
 
-	std::filesystem::path const rom_path = "C:\\tmp\\maze.ch8";
+	std::filesystem::path const rom_path = argv[1];
 
 	Console console;
 	init_console(console);

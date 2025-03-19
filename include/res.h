@@ -39,6 +39,7 @@ namespace emu
 			error += "\nCode is " + std::to_string(static_cast<size_t>(iErrc->rc)) 
 				+ " / syserr " + std::to_string(iErrc->sys_code);
 			}
+		fprintf(stderr, "Error : %s\n", error.c_str());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Chip8Emu Error", error.c_str(), nullptr);
 		}
 
